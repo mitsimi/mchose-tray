@@ -3,7 +3,10 @@ name = "mchose-tray"
 version = "0.1.0"
 edition = "2024"
 description = "A small Windows battery tray for the MCHOSE K7 V2 Ultra+"
+authors = ["mitsimi"]
 default-run = "mchose-tray"
+license = "GPL-3.0-or-later"
+repository = "https://github.com/mitsimi/mchose-tray"
 
 [dependencies]
 hidapi = { version = "2.6", default-features = false, features = ["windows-native"] }
