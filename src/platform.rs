@@ -12,7 +12,10 @@ use windows_sys::Win32::{
     },
     System::{
         LibraryLoader::GetModuleHandleW,
-        Registry::{HKEY_CURRENT_USER, RRF_RT_REG_DWORD, RegGetValueW},
+        Registry::{
+            HKEY, HKEY_CURRENT_USER, KEY_SET_VALUE, REG_SZ, RRF_RT_REG_DWORD, RRF_RT_REG_SZ,
+            RegCloseKey, RegCreateKeyExW, RegDeleteValueW, RegGetValueW, RegSetValueExW,
+        },
         SystemInformation::GetLocalTime,
         Threading::CreateMutexW,
     },
@@ -27,6 +30,8 @@ use windows_sys::Win32::{
 const CLASS_NAME: &str = "MchoseTrayMessageWindow";
 const MUTEX_NAME: &str = "Local\\MchoseTray";
 const WAKE_MESSAGE: u32 = WM_APP + 1;
+const RUN_KEY: &str = "Software\\Microsoft\\Windows\\CurrentVersion\\Run";
+const RUN_VALUE: &str = "MCHOSE Tray";
 static THEME_CHANGED: AtomicBool = AtomicBool::new(false);
 
 pub(crate) enum MessageKind {
@@ -195,6 +200,81 @@ pub(crate) fn dark_taskbar() -> bool {
         )
     };
     result == 0 && value == 0
+}
+
+pub(crate) fn starts_with_windows() -> bool {
+    let key = wide(RUN_KEY);
+    let value_name = wide(RUN_VALUE);
+    let mut size = 0_u32;
+    // SAFETY: the registry paths are terminated and no value buffer is requested.
+    unsafe {
+        RegGetValueW(
+            HKEY_CURRENT_USER,
+            key.as_ptr(),
+            value_name.as_ptr(),
+            RRF_RT_REG_SZ,
+            null_mut(),
+            null_mut(),
+            &mut size,
+        ) == 0
+    }
+}
+
+pub(crate) fn set_starts_with_windows(enabled: bool) -> Result<(), String> {
+    let command = if enabled {
+        let executable = std::env::current_exe()
+            .map_err(|error| format!("Could not find the MCHOSE Tray executable: {error}"))?;
+        Some(wide(&format!("\"{}\"", executable.display())))
+    } else {
+        None
+    };
+    let key_name = wide(RUN_KEY);
+    let value_name = wide(RUN_VALUE);
+    let mut key: HKEY = null_mut();
+    // SAFETY: all pointers supplied are valid and the returned handle is closed below.
+    let result = unsafe {
+        RegCreateKeyExW(
+            HKEY_CURRENT_USER,
+            key_name.as_ptr(),
+            0,
+            null_mut(),
+            0,
+            KEY_SET_VALUE,
+            null(),
+            &mut key,
+            null_mut(),
+        )
+    };
+    if result != 0 {
+        return Err(format!("Could not open Windows startup settings: {result}"));
+    }
+
+    let result = if enabled {
+        let command = command.expect("startup command is present when enabled");
+        // SAFETY: key is valid and command includes its terminating null character.
+        unsafe {
+            RegSetValueExW(
+                key,
+                value_name.as_ptr(),
+                0,
+                REG_SZ,
+                command.as_ptr().cast(),
+                (command.len() * std::mem::size_of::<u16>()) as u32,
+            )
+        }
+    } else {
+        // SAFETY: key is valid and value_name is a terminated string.
+        unsafe { RegDeleteValueW(key, value_name.as_ptr()) }
+    };
+    // SAFETY: key was returned by RegCreateKeyExW and is owned by this function.
+    unsafe { RegCloseKey(key) };
+    if result == 0 {
+        Ok(())
+    } else {
+        Err(format!(
+            "Could not update Windows startup settings: {result}"
+        ))
+    }
 }
 
 pub(crate) fn show_message(title: &str, message: &str, kind: MessageKind) {

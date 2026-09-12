@@ -21,6 +21,7 @@ pub(crate) struct TrayUi {
     status_item: MenuItem,
     percentage_item: CheckMenuItem,
     battery_item: CheckMenuItem,
+    startup_item: CheckMenuItem,
     refresh_item: MenuItem,
     quit_item: MenuItem,
     status: Status,
@@ -43,6 +44,12 @@ impl TrayUi {
             mode == DisplayMode::Battery,
             None,
         );
+        let startup_item = CheckMenuItem::new(
+            "Start with Windows",
+            true,
+            platform::starts_with_windows(),
+            None,
+        );
         let refresh_item = MenuItem::new("Refresh", true, None);
         let quit_item = MenuItem::new("Quit", true, None);
         let menu = Menu::new();
@@ -51,6 +58,8 @@ impl TrayUi {
             &PredefinedMenuItem::separator(),
             &percentage_item,
             &battery_item,
+            &PredefinedMenuItem::separator(),
+            &startup_item,
             &PredefinedMenuItem::separator(),
             &refresh_item,
             &quit_item,
@@ -72,6 +81,7 @@ impl TrayUi {
             status_item,
             percentage_item,
             battery_item,
+            startup_item,
             refresh_item,
             quit_item,
             status: Status::Unavailable,
@@ -115,6 +125,14 @@ impl TrayUi {
         }
         if event.id == *self.quit_item.id() {
             return Ok(Action::Quit);
+        }
+        if event.id == *self.startup_item.id() {
+            // The native menu has already toggled the checkbox before this event.
+            let enabled = self.startup_item.is_checked();
+            platform::set_starts_with_windows(enabled)
+                .map_err(|error| format!("Could not change startup setting: {error}"))?;
+            self.startup_item.set_checked(enabled);
+            return Ok(Action::None);
         }
         if event.id == *self.percentage_item.id() {
             self.select_mode(DisplayMode::Percentage)?;

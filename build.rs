@@ -31,7 +31,7 @@ fn embed_version_resources() -> io::Result<()> {
     println!("cargo:rerun-if-changed={}", icon.display());
 
     for (binary, description) in [
-        ("mchose-tray", "MCHOSE Battery Tray"),
+        ("mchose-tray", "MCHOSE Tray"),
         ("mchose-check", "MCHOSE Battery Diagnostic"),
     ] {
         let rc = output.join(format!("{binary}.rc"));
@@ -100,7 +100,7 @@ BEGIN
             VALUE "FileVersion", "{dotted}\0"
             VALUE "InternalName", "{binary}\0"
             VALUE "OriginalFilename", "{binary}.exe\0"
-            VALUE "ProductName", "MCHOSE Battery\0"
+            VALUE "ProductName", "MCHOSE Tray\0"
             VALUE "ProductVersion", "{dotted}\0"
         END
     END

@@ -5,7 +5,7 @@ It shows either a large battery percentage or an upright, colour-coded battery i
 
 ## Use
 
-Run `mchose-tray.exe`. The icon appears next to the clock, possibly under the hidden-icons arrow.
+Install `MCHOSE Tray Setup.exe`, then launch **MCHOSE Tray** from the Start menu. The icon appears next to the clock, possibly under the hidden-icons arrow.
 
 - **Percentage** shows large digits; the tooltip includes the exact percentage.
 - **Colored battery** fills bottom to top: green above 50%, amber at 21–50%, red at 20% or below.
@@ -14,7 +14,7 @@ Run `mchose-tray.exe`. The icon appears next to the clock, possibly under the hi
 
 Your display choice is saved automatically. `?` means the mouse did not return a usable reading; `–` means the receiver is not connected.
 
-To start it with Windows, place `mchose-tray.exe` in a permanent folder, then add a shortcut to it in `shell:startup`.
+Select **Start with Windows** from the tray menu to run it automatically after sign-in. The installer also offers this option.
 
 ## Build
 
@@ -26,6 +26,7 @@ cargo test
 cargo clippy --all-targets -- -D warnings
 ```
 
+
 `mchose-check` reads the battery without starting the tray app:
 
 ```powershell
@@ -33,6 +34,10 @@ cargo run --release --bin mchose-check
 ```
 
 The battery protocol is documented in [PROTOCOL.md](PROTOCOL.md).
+
+## Creating the installer
+
+Install [Inno Setup](https://jrsoftware.org/isinfo.php), build the release executable, then open `installer/MchoseTray.iss` in Inno Setup and choose **Build → Compile**. The installer is written to `dist` and installs per user, without requiring administrator rights.
 
 ## Credits
 
