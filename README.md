@@ -39,6 +39,28 @@ The battery protocol is documented in [PROTOCOL.md](PROTOCOL.md).
 
 Install [Inno Setup](https://jrsoftware.org/isinfo.php), build the release executable, then open `installer/MchoseTray.iss` in Inno Setup and choose **Build → Compile**. The installer is written to `dist` and installs per user, without requiring administrator rights.
 
+## Publishing a release
+
+The GitHub Actions release workflow builds the Windows x64 app, runs formatting,
+tests and Clippy, compiles the installer with Inno Setup 7.1.0, and uploads the
+setup executable to a GitHub release. It uses GitHub's built-in token; no extra
+repository secrets are required.
+
+Update the version in `Cargo.toml`, run `cargo check` to update `Cargo.lock`,
+and commit the changes before tagging. The tag must be `v` followed by the exact
+package version. For example, with version `0.1.0`:
+
+```powershell
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+New releases get generated release notes; versions containing a hyphen are marked
+as prereleases. If a release already exists, the workflow uploads or replaces its
+setup asset without changing the release notes. You can rerun a failed workflow,
+or manually run **Release** against an existing version tag. Manual runs against
+branches are rejected. Published immutable releases cannot have assets replaced.
+
 ## Credits
 
 This project is based on [Mouse Tray Charge](https://github.com/Fan4Metal/mouse_tray) by Fan4Metal. Its driver structure and the original Python implementation provided the foundation for validating the MCHOSE receiver protocol before this Rust tray app was built.

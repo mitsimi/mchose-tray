@@ -1,8 +1,8 @@
 ; Build the Rust release binary first: cargo build --release
-; Then compile this file with Inno Setup 6 or newer.
+; Then compile this file with Inno Setup 7.
 
 #define MyAppName "MCHOSE Tray"
-#define MyAppVersion GetFileVersion("..\\target\\release\\mchose-tray.exe")
+#define MyAppVersion GetVersionNumbersString("..\\target\\release\\mchose-tray.exe")
 #define MyAppPublisher "mitsimi"
 #define MyAppURL "https://github.com/mitsimi/mchose-tray"
 #define MyAppExeName "mchose-tray.exe"
