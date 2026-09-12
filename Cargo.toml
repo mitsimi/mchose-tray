@@ -1,0 +1,29 @@
+[package]
+name = "mchose-tray"
+version = "0.1.0"
+edition = "2024"
+description = "A small Windows battery tray for the MCHOSE K7 V2 Ultra+"
+default-run = "mchose-tray"
+
+[dependencies]
+hidapi = { version = "2.6", default-features = false, features = ["windows-native"] }
+tray-icon = { version = "0.24", default-features = false }
+fontdue = "0.9"
+png = "0.18"
+windows-sys = { version = "0.61", features = [
+    "Win32_Foundation",
+    "Win32_Security",
+    "Win32_System_LibraryLoader",
+    "Win32_System_Threading",
+    "Win32_System_Registry",
+    "Win32_System_SystemInformation",
+    "Win32_Storage_FileSystem",
+    "Win32_UI_WindowsAndMessaging",
+    "Win32_Graphics_Gdi",
+] }
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true
+opt-level = "s"
