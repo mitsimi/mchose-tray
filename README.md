@@ -1,4 +1,4 @@
-# MCHOSE Battery
+# MCHOSE Tray
 
 A small Windows tray app for the MCHOSE K7 V2 Ultra+ wireless receiver.
 It shows either a large battery percentage or an upright, colour-coded battery icon.
